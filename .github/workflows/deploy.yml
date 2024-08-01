@@ -1,33 +1,19 @@
-name: Node.js CI
+FROM node:lts-buster
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+RUN apt-get update && \
+  apt-get install -y \
+  ffmpeg \
+  imagemagick \
+  webp && \
+  apt-get upgrade -y && \
+  rm -rf /var/lib/apt/lists/*
 
-jobs:
-  build:
+COPY package.json .
 
-    runs-on: ubuntu-latest
+RUN npm install && npm install -g qrcode-terminal pm2
 
-    strategy:
-      matrix:
-        node-version: [20.x]
+COPY . .
 
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+EXPOSE 5000
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-
-    - name: Install dependencies
-      run: npm install
-
-    - name: Start application
-      run: npm start
+CMD ["npm", "start"]
